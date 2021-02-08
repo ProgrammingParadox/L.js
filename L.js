@@ -27,6 +27,50 @@ var L = (function(){
             }
             
             return r;
-        }
+        },
+        recursive: function(config, i){
+            /**
+             * CONFIG:
+             * 
+             * config: obj format L.config
+             * i: int
+             **/
+            
+            var cur = config.axiom;
+            for(var _i = 0; _i<i; _i++){
+                cur = this.generate(config);
+                config.axiom = cur;
+            }
+            
+            return cur;
+        },
+        draw: function(config){
+            /**
+             * CONFIG:
+             * 
+             * {
+             *     str: str,   
+             *   
+             *     x: int,
+             *     y: int,
+             * 
+             *     angle: int,
+             *     stepLength: int,
+             * 
+             *     commands: obj format {str: funct(config), str: funct(config), ...},
+             * }
+             **/
+            
+            var commands = config.commands;
+            
+            translate(config.x, config.y);
+            var cur = config.str;
+            
+            for(var i = 0; i<cur.length; i++){
+                var c = cur.charAt(i);
+                
+                commands[c](config);
+            }
+        },
     };
 })();
