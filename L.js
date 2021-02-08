@@ -71,6 +71,8 @@ var L = (function(){
                 
                 commands[c](config);
             }
+            
+            resetMatrix();
         },
     };
 })();
