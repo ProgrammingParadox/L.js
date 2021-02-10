@@ -1,22 +1,31 @@
 <!DOCTYPE html>
+<!-- This is based on DillingerLee's great template here:
+https://github.com/Team-Code/KA_Offline -->
 <html>
 
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width">
-	<title>L.js</title>
+	<title>L-System</title>
 	<link rel="stylesheet" href="https://unpkg.com/98.css">
-	<link href="style.css" rel="stylesheet" type="text/css" />
-	<link href="style.css" rel="typeface" type="text/css" />
 
 	<style>
+		table,
+		th,
+		td {
+			border: 1px solid black;
+		}
+
+		div .inline {
+			float: left;
+			margin-top: 6px;
+			margin-left: 8px;
+		}
 	</style>
 </head>
 
-<body style = "background-color: #00807F;">
+<body>
 	<div class="window" style="width: 900px; overflow: hidden; resize: both;">
 		<div class="title-bar">
-			<div class="title-bar-text"><a href = "https://github.com/ProgrammingParadox/L.js" style = "color: #FFF;">L.js (v1.0.1)</a></div>
+			<div class="title-bar-text"><a href="https://github.com/ProgrammingParadox/L.js" style="color: #FFF;">L.js (v0.1.0a)</a></div>
 			<div class="title-bar-controls">
 				<button aria-label="Minimize"></button>
         <button aria-label="Maximize"></button>
@@ -28,10 +37,250 @@
 
         <p>This website is a work in progress!</p>
 
-        <h7>This page was made using <a href = "https://jdan.github.io/98.css/">98.css</a></h7>
-    </div>
-    </div>
+        <ul class="tree-view">
+            <li>
+            <p align="center">
+                <canvas id="mycanvas"></canvas>
+            </p>
+            </li>
+        </ul>
 
-    <script src="script.js"></script>
-  </body>
+        <script src="https://cdn.jsdelivr.net/processing.js/1.4.8/processing.min.js">
+        </script>
+
+        <div class="field-row, inline">
+        <label for="text17">Axiom</label>
+        <input id="text17" type="text" placeholder="axiom" class = "axiom"/>
+        </div>
+        <div class="field-row, inline">
+        <label for="text17">Angle</label>
+        <input id="text17" type="text" value="21" placeholder="angle" class="angle"/>
+        </div>
+        <div class="field-row, inline">
+        <label for="text17">Step length</label>
+        <input id="text17" type="text" value="4" placeholder="step length" class="step-length"/>
+        </div>
+        <div class="field-row, inline">
+        <label for="text17">Illiteration</label>
+        <input id="text17" type="text" value="4" placeholder="illiteration" class="i"/>
+        </div>
+
+        <br style="clear: both;">
+
+        <button onClick="run()" style = "margin-top: 8px;">Generate</button>
+        
+        <script>
+            var run = function(){
+            var _axiom = document.getElementsByClassName("axiom")[0].value;
+            var _angle = parseInt(document.getElementsByClassName("angle")[0].value);
+            var _stepLength = parseInt(document.getElementsByClassName("step-length")[0].value);
+            var _i = parseInt(document.getElementsByClassName("i")[0].value)
+
+            console.log(_stepLength + " | " + _i + " | " + _angle + " | " + _axiom);
+
+            var sketchProc = function(processingInstance) {
+            with (processingInstance) {
+                size(400, 400); 
+                frameRate(30);
+                
+                var L = (function(){
+                /**
+                 * (c) 2021 The_Paradox, programmingParadox, all rights reserved.
+                 * https://www.khanacademy.org/computer-programming/L/6618703010938880
+                 * 
+                 * Avaliable under the MIT license
+                 **/
+                
+                return {
+                    generate: function(config){
+                        /**
+                        * CONFIG:
+                        * 
+                        * {
+                        *     constants: arr format [str, str, ...],
+                        *     axiom: str,
+                        *     rules: obj format {str: str, str: str, ...},
+                        * }
+                        **/
+                        var axiom = config.axiom;
+                        
+                        var r = "";
+                        
+                        for(var i = 0; i<axiom.length; i++){
+                            var cur = axiom.charAt(i);
+                            var isConstant = config.constants.indexOf(cur) !== -1;
+                            
+                            if(!isConstant){
+                                r += config.rules[cur];
+                            }else{
+                                r += cur;
+                            }
+                        }
+                        
+                        return r;
+                    },
+                    recursive: function(config, i){
+                        /**
+                        * CONFIG:
+                        * 
+                        * config: obj format L.config
+                        * i: int
+                        **/
+                        
+                        var cur = config.axiom;
+                        for(var _i = 0; _i<i; _i++){
+                            cur = this.generate(config);
+                            config.axiom = cur;
+                        }
+                        
+                        return cur;
+                    },
+                    draw: function(config){
+                        /**
+                        * CONFIG:
+                        * 
+                        * {
+                        *     str: str,   
+                        *   
+                        *     x: int,
+                        *     y: int,
+                        * 
+                        *     angle: int,
+                        *     stepLength: int,
+                        * 
+                        *     commands: obj format {str: funct(config), str: funct(config), ...},
+                        * }
+                        **/
+                        
+                        var commands = config.commands;
+                        
+                        translate(config.x, config.y);
+                        var cur = config.str;
+                        
+                        for(var i = 0; i<cur.length; i++){
+                            var c = cur.charAt(i);
+                            
+                            commands[c](config);
+                        }
+                        
+                        resetMatrix();
+                    },
+                };
+            })();
+
+                var axioms = ["F+[FXX]--[FXX]++[X]", "F-[XXF]++[FXX]--[X]", "F[-F[+FX]FX]+[FX][+FX]", "F-[F[+FX]FX]+[F+FX]+[+FX]", "F[-X[-X]][F[+X]]+[F[+X]]", "F[-FXFX]F[+FXFX]", "F[-X]+[+X][FX][--FX]", "F[-FXF][FFX][+FX]", "F[[F[+FX]FFX][+FX]]-X"];
+                var axiom = _axiom || axioms[floor(random(axioms.length))];
+                var config = {
+                    constants: ["]", "[", "+", "-"],
+                    axiom: axiom,
+                    rules: {
+                        "X": axiom,
+                        "F": "FF",
+                    }
+                };
+                
+                var cur = L.recursive(config, _i);
+                
+                background(255, 255, 255);
+                var config = {
+                    str: cur,
+                    
+                    x: 200,
+                    y: 400,
+                    
+                    angle: radians(_angle),
+                    stepLength: _stepLength,
+                    
+                    commands: {            
+                        "F": function(config){
+                            stroke(120, 78, 0);
+                            
+                            strokeWeight(2);
+                            line(0, 0, 0, -config.stepLength);
+                            translate(0, -config.stepLength);
+                        },
+                        "X": function(config){
+                            strokeWeight(2);
+                            stroke(26, 255, 0);
+                            line(-1, 0, 1, 0);
+                        },
+                        "+": function(config){
+                            rotate(config.angle);
+                        },
+                        "-": function(config){
+                            rotate(-config.angle);
+                        },
+                        "[": function(config){
+                            pushMatrix();
+                        },
+                        "]": function(config){
+                            popMatrix();
+                        },
+                    },
+                };
+
+                background(255, 255, 255);
+                    
+                config.angle = radians(_angle);
+                L.draw(config);
+            }};
+
+            var canvas = document.getElementById("mycanvas"); 
+            var processingInstance = new Processing(canvas, sketchProc); 
+            };
+
+            run();
+        </script>
+
+        <p>The axiom can be made up of these characters: F, X, + , -, [, and ]. You should always have the same amount of "["s and "]"s. </p>
+
+        <table style="width:100%;">
+        <tr>
+            <th>from</th>
+            <th>to</th>
+        </tr>
+        <tr>
+            <td>F</td>
+            <td>FF</td>
+        </tr>
+        <tr>
+            <td>X</td>
+            <td>The original axiom (starting point)</td>
+        </tr>
+        </table>
+
+        <table style="width:100%;">
+        <tr>
+            <th>char</th>
+            <th>command</th>
+        </tr>
+        <tr>
+            <td>F</td>
+            <td>goes forwards</td>
+        </tr>
+        <tr>
+            <td>+</td>
+            <td>rotate right</td>
+        </tr>
+        <tr>
+            <td>-</td>
+            <td>rotate left</td>
+        </tr>
+        <tr>
+            <td>[</td>
+            <td>push position (saves the position for later)</td>
+        </tr>
+        <tr>
+            <td>]</td>
+            <td>pop position (go back to the last push position)</td>
+        </tr>
+        </table>
+
+        <br>
+        <h7>This page was made using <a href = "https://jdan.github.io/98.css/">98.css</a></h7>
+
+        </div>
+    </div>
+</body>
+
 </html>
