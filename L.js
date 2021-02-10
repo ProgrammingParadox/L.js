@@ -1,16 +1,22 @@
 var L = (function(){
     /**
-     * CONFIG:
+     * (c) 2021 The_Paradox, programmingParadox, all rights reserved.
+     * https://www.khanacademy.org/computer-programming/L/6618703010938880
      * 
-     * {
-     *     constants: arr format [str, str, ...],
-     *     axiom: str,
-     *     rules: obj format {str: str, str: str, ...},
-     * }
-    **/
+     * Avaliable under the MIT license
+     **/
     
     return {
         generate: function(config){
+            /**
+             * CONFIG:
+             * 
+             * {
+             *     constants: arr format [str, str, ...],
+             *     axiom: str,
+             *     rules: obj format {str: str, str: str, ...},
+             * }
+            **/
             var axiom = config.axiom;
             
             var r = "";
