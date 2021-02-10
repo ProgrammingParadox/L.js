@@ -8,3 +8,7 @@ Coming soon!
 
 ### Examples
 [Khan Academy](https://www.khanacademy.org/computer-programming/L/6618703010938880)
+[HTML](https://ljs-test.theparadox31415.repl.co/)
+
+### Notes
+I haven't gotten it to work by importing the library, but the code most definatley works.
